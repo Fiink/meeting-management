@@ -10,9 +10,6 @@ namespace MeetingManagementSystem.Data.Models
         [Required]
         public string Name { get; set; }
 
-        [Required]
-        public string Initials { get; set; }
-
         public ICollection<Reservation> Reservations { get; set; }
 
         public ICollection<MeetingParticipant> ParticipatingInMeetings { get; set; }
