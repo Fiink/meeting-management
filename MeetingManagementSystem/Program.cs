@@ -1,6 +1,8 @@
 
 using MeetingManagementSystem.Data.Db;
+using MeetingManagementSystem.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 
 namespace MeetingManagementSystem
 {
@@ -15,17 +17,26 @@ namespace MeetingManagementSystem
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             // Configure services
+            builder.Services.AddScoped<IUserService, UserService>();
 
             // Configure REST controllers
             builder.Services.AddControllers();
-            
+            // Configure Swagger
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Meeting Management System API", Version = "v1" });
+            });
 
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
-                Console.WriteLine("TODO Set up swagger");
+                app.UseSwagger();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("v1/swagger.json", "Meeting Management System API");
+                });
             }
 
             app.UseAuthorization();

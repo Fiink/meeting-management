@@ -1,5 +1,4 @@
 ﻿using MeetingManagementSystem.Data.Models;
-using System.ComponentModel.DataAnnotations;
 
 namespace MeetingManagementSystem.Contracts
 {
@@ -13,10 +12,6 @@ namespace MeetingManagementSystem.Contracts
         {
             Id = user.Id;
             Name = user.Name;
-        }
-
-        public UserDTO()
-        {
         }
     }
 }

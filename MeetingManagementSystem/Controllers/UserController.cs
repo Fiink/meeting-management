@@ -1,9 +1,6 @@
 ﻿using MeetingManagementSystem.Contracts;
-using MeetingManagementSystem.Data.Models;
 using MeetingManagementSystem.Exceptions;
 using MeetingManagementSystem.Services;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MeetingManagementSystem.Controllers
@@ -12,10 +9,10 @@ namespace MeetingManagementSystem.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly ILogger<WeatherForecastController> _log;
+        private readonly ILogger<UserController> _log;
         private readonly IUserService _userService;
 
-        public UserController(ILogger<WeatherForecastController> log, IUserService userService)
+        public UserController(ILogger<UserController> log, IUserService userService)
         {
             _log = log;
             _userService = userService;
@@ -41,7 +38,7 @@ namespace MeetingManagementSystem.Controllers
                 return NotFound();
             } else
             {
-                return Ok(user);
+                return Ok(new UserDTO(user));
             }
         }
 
