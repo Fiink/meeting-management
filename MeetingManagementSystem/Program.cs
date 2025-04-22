@@ -1,4 +1,7 @@
 
+using MeetingManagementSystem.Data.Db;
+using Microsoft.EntityFrameworkCore;
+
 namespace MeetingManagementSystem
 {
     public class Program
@@ -7,18 +10,22 @@ namespace MeetingManagementSystem
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            // Configure ORM
+            builder.Services.AddDbContext<MeetingDbContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+            // Configure services
+
+            // Configure REST controllers
             builder.Services.AddControllers();
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-            builder.Services.AddOpenApi();
+            
 
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
-                app.MapOpenApi();
+                Console.WriteLine("TODO Set up swagger");
             }
 
             app.UseAuthorization();
