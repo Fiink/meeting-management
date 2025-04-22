@@ -2,20 +2,20 @@
 
 namespace MeetingManagementSystem.Contracts
 {
-    public class UserDTO
+    public class ParticipantDTO
     {
         public int Id { get; set; }
         public string Name { get; set; }
 
-        public UserDTO(User user)
+        public ParticipantDTO(MeetingParticipant participant)
         {
-            Id = user.Id;
-            Name = user.Name;
+            Id = participant.ParticipantId;
+            Name = participant.Participant.Name;
         }
 
         public override string ToString()
         {
-            return $"UserDTO {{ " +
+            return $"ParticipantDTO {{ " +
                    $"Id = {Id}, " +
                    $"Name = {Name}" +
                    $"}}";

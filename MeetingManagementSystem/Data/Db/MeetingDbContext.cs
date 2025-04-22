@@ -6,6 +6,7 @@ namespace MeetingManagementSystem.Data.Db
     public class MeetingDbContext(DbContextOptions<MeetingDbContext> options) : DbContext(options)
     {
         public DbSet<User> Users { get; set; }
+        public DbSet<MeetingRoom> MeetingRooms { get; set; }
         public DbSet<Reservation> Reservations { get; set; }
         public DbSet<MeetingParticipant> MeetingParticipants { get; set; }
 

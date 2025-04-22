@@ -96,6 +96,13 @@ namespace MeetingManagementSystem.Services
             }
         }
 
+        public ICollection<User> GetUsersByIds(ICollection<int> participantIds)
+        {
+            return [.. (from user in _dbContext.Users
+                   where participantIds.Contains(user.Id)
+                   select user)];
+        }
+
         private bool IsNameInUse(string name)
         {
             return _dbContext.Users.Any(user => user.Name.Contains(name));

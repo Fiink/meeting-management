@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
-
-namespace MeetingManagementSystem.Exceptions
+﻿namespace MeetingManagementSystem.Exceptions
 {
     /// <summary>
     /// Represents exceptions occurring when performing certain actions using services, e.g. when 
@@ -10,7 +8,7 @@ namespace MeetingManagementSystem.Exceptions
     {
         public enum ExceptionType
         {
-            CONFLICT, NOT_FOUND, PERSISTENCE_ERROR, UNKNOWN
+            CONFLICT, NOT_FOUND, PERSISTENCE_ERROR, UNPROCESSABLE_ENTITY, UNKNOWN
         };
 
         public ExceptionType Type { get; }

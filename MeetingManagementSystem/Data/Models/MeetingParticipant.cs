@@ -9,5 +9,17 @@ namespace MeetingManagementSystem.Data.Models
 
         public int ParticipantId { get; set; }
         public User Participant { get; set; }
+
+        public MeetingParticipant(Reservation reservation, User participant)
+        {
+            ReservationId = reservation.Id;
+            Reservation = reservation;
+            ParticipantId = participant.Id;
+            Participant = participant;
+        }
+
+        public MeetingParticipant()
+        {
+        }
     }
 }

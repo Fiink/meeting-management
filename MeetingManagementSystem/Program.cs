@@ -18,6 +18,7 @@ namespace MeetingManagementSystem
 
             // Configure services
             builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IMeetingService, MeetingService>();
 
             // Configure REST controllers
             builder.Services.AddControllers();

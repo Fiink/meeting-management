@@ -7,16 +7,10 @@ namespace MeetingManagementSystem.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UserController : ControllerBase
+    public class UsersController(ILogger<UsersController> log, IUserService userService) : AbstractController
     {
-        private readonly ILogger<UserController> _log;
-        private readonly IUserService _userService;
-
-        public UserController(ILogger<UserController> log, IUserService userService)
-        {
-            _log = log;
-            _userService = userService;
-        }
+        private readonly ILogger<UsersController> _log = log;
+        private readonly IUserService _userService = userService;
 
         [HttpGet]
         public ActionResult<IEnumerable<UserDTO>> GetUsers()
@@ -51,8 +45,9 @@ namespace MeetingManagementSystem.Controllers
             {
                 var user = _userService.AddUser(userName);
                 return Ok(new UserDTO(user));
-            } catch (ResultException e)
+            } catch (Exception e)
             {
+                _log.LogError("Exception occurred while adding user, userName={}, e={}", userName, e);
                 return MapError(e);
             }
         }
@@ -60,15 +55,16 @@ namespace MeetingManagementSystem.Controllers
         [HttpPatch("{id}")]
         public ActionResult<UserDTO> UpdateUserName([FromRoute] int id, [FromBody] string newName)
         {
-            _log.LogTrace("Received request to update users name, id= {}, newName={}", id, newName);
+            _log.LogTrace("Received request to update users name, id={}, newName={}", id, newName);
 
             try
             {
                 var user = _userService.UpdateUserName(id, newName);
                 return Ok(new UserDTO(user));
             }
-            catch (ResultException e)
+            catch (Exception e)
             {
+                _log.LogError("Exception occurred while updating users name, id={}, newName={}, e={}", id, newName, e);
                 return MapError(e);
             }
         }
@@ -83,33 +79,11 @@ namespace MeetingManagementSystem.Controllers
                 _userService.RemoveUser(id);
                 return NoContent();
             }
-            catch (ResultException e)
+            catch (Exception e)
             {
+                _log.LogError("Exception occurred while removing user, id={}, e={}", id, e);
                 return MapError(e);
             }
-        }
-
-        /// <summary>
-        /// Maps exceptions to a corresponding ActionResult
-        /// </summary>
-        /// <param name="e">Exception that should be mapped</param>
-        /// <returns>A matching ActionResult</returns>
-        private ActionResult MapError(Exception e)
-        {
-            if (!(e is ResultException resultException))
-            {
-                // Rethrow exception to cause an internal server error
-                throw e;
-            }
-
-            return resultException.Type switch
-            {
-                ResultException.ExceptionType.NOT_FOUND => NotFound(resultException.ErrorMessage),
-                ResultException.ExceptionType.CONFLICT => Conflict(resultException.ErrorMessage),
-                ResultException.ExceptionType.PERSISTENCE_ERROR => Conflict(resultException.ErrorMessage),
-                _ => throw resultException // Throw an internal server error
-            };
-
         }
     }
 }
