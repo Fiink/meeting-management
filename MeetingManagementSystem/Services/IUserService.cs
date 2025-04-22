@@ -4,8 +4,8 @@ namespace MeetingManagementSystem.Services
 {
     public interface IUserService
     {
-        ICollection<User> GetAllUsers();
-        ICollection<User> GetUsersByIds(ICollection<int> participantIds);
+        List<User> GetAllUsers();
+        List<User> GetUsersByIds(ICollection<int> participantIds);
         User? GetUserById(int id);
         User AddUser(string name);
         User UpdateUserName(int id, string newName);

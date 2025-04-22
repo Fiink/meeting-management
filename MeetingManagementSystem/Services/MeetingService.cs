@@ -2,6 +2,7 @@
 using MeetingManagementSystem.Data.Models;
 using MeetingManagementSystem.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace MeetingManagementSystem.Services
 {
@@ -11,30 +12,62 @@ namespace MeetingManagementSystem.Services
         private readonly MeetingDbContext _dbContext = dbContext;
         private readonly IUserService _userService = userService;
 
-        public IEnumerable<Reservation> GetAllReservations(bool includeExpired = false)
+        public List<Reservation> GetAllReservations(bool includeExpired = false)
         {
-            return from reservation in _dbContext.Reservations
-                   where FilterRemoveExpiredReservations(reservation, includeExpired)
-                   orderby reservation.StartTime
-                   select reservation;
+            IQueryable<Reservation> query = _dbContext.Reservations;
+            if (!includeExpired)
+            {
+                query = FilterRemoveExpiredReservations(query);
+            }
+            return query
+                .Include(r => r.MeetingRoom)
+                .Include(r => r.Participants)
+                .ThenInclude(p => p.Participant)
+                .Include(r => r.ReservationOwner)
+                .OrderBy(r => r.StartTime).ToList();
         }
 
-        public IEnumerable<Reservation> GetReservationsByOwner(int ownerId, bool includeExpired = false)
+        public List<Reservation> GetReservationsByOwner(int ownerId, bool includeExpired = false)
         {
-            return from reservation in _dbContext.Reservations
-                   where ownerId == reservation.ReservationOwnerId && FilterRemoveExpiredReservations(reservation, includeExpired)
-                   orderby reservation.StartTime
-                   select reservation;
+            IQueryable<Reservation> query = _dbContext.Reservations
+                .Where(r => ownerId == r.ReservationOwnerId);
+            if (!includeExpired)
+            {
+                query = FilterRemoveExpiredReservations(query);
+            }
+            return query
+                .Include(r => r.MeetingRoom)
+                .Include(r => r.Participants)
+                .ThenInclude(p => p.Participant)
+                .Include(r => r.ReservationOwner)
+                .OrderBy(r => r.StartTime).ToList();
         }
 
-        public IEnumerable<Reservation> GetReservationsForParticipant(int participantId, bool includeExpired = false) {
-            return from user in _dbContext.Users
-                   join participant in _dbContext.MeetingParticipants
-                        on user.Id equals participant.ParticipantId
-                   join reservation in _dbContext.Reservations
-                        on participant.ReservationId equals reservation.Id
-                   where user.Id == participantId && FilterRemoveExpiredReservations(reservation, includeExpired)
-                   select reservation;
+        public List<Reservation> GetReservationsForParticipant(int participantId, bool includeExpired = false) {
+            var query = _dbContext.Users
+                .Where(user => user.Id == participantId)
+                .Join(
+                    _dbContext.MeetingParticipants,
+                    user => user.Id,
+                    participant => participant.ParticipantId,
+                    (user, participant) => participant
+                )
+                .Join(
+                    _dbContext.Reservations,
+                    participant => participant.ReservationId,
+                    reservation => reservation.Id,
+                    (participant, reservation) => reservation
+                );
+            if (!includeExpired)
+            {
+                query = FilterRemoveExpiredReservations(query);
+            }
+            return query
+                .Include(r => r.MeetingRoom)
+                .Include(r => r.Participants)
+                .ThenInclude(p => p.Participant)
+                .Include(r => r.ReservationOwner)
+                .ToList();
         }
 
         public Reservation AddReservation(int ownerId, int meetingRoomId, string? meetingName, DateTimeOffset startTime,
@@ -77,7 +110,7 @@ namespace MeetingManagementSystem.Services
                 EndTime = endTime,
                 Participants = new List<MeetingParticipant>()
             };
-            var reservationEntry = _dbContext.Add(reservation);
+            var reservationEntity = _dbContext.Add(reservation);
 
             if (participantIds != null)
             {
@@ -106,7 +139,41 @@ namespace MeetingManagementSystem.Services
                 _log.LogError("Error occurred while adding reservation, reservation={}, e={}", reservation, e);
                 throw new ResultException(ResultException.ExceptionType.PERSISTENCE_ERROR, "Error saving reservation");
             }
-            return reservationEntry.Entity;
+            return reservationEntity.Entity;
+        }
+
+        public List<MeetingRoom> GetAllMeetingRooms()
+        {
+            return [.. _dbContext.MeetingRooms];
+        }
+        public MeetingRoom AddMeetingRoom(string name)
+        {
+            // Check if room name is already used
+            var nameLowercase = name.ToLower();
+            if ((from room in _dbContext.MeetingRooms
+                    where !String.IsNullOrEmpty(room.RoomName) && room.RoomName.Equals(nameLowercase)
+                    select room).Any())
+            {
+                _log.LogError("Meeting room with name already exists, name={}", name);
+                throw new ResultException(ResultException.ExceptionType.CONFLICT, "Room with provided name already exists");
+            }
+
+            var meetingRoom = new MeetingRoom
+            {
+                RoomName = name
+            };
+            var meetingRoomEntity = _dbContext.Add(meetingRoom);
+
+            try
+            {
+                _dbContext.SaveChanges();
+            }
+            catch (DbUpdateException e)
+            {
+                _log.LogError("Error occurred while adding meeting room, meetingRoom={}, e={}", meetingRoom, e);
+                throw new ResultException(ResultException.ExceptionType.PERSISTENCE_ERROR, "Error saving meeting room");
+            }
+            return meetingRoomEntity.Entity;
         }
 
         private MeetingRoom? GetMeetingRoomById(int id)
@@ -124,12 +191,12 @@ namespace MeetingManagementSystem.Services
         }
 
         /// <summary>
-        /// If includeExpired is set to false, will filter reservations that have expired w.r.t. the current system time.
+        /// Will filter reservations that have expired w.r.t. the current system time.
         /// </summary>
-        /// <returns>Always true if includeExpired is set to true. Otherwise, returns true if the provided reservation has not expired.</returns>
-        private static bool FilterRemoveExpiredReservations(Reservation reservation, bool includeExpired)
+        /// <returns>Query with filter applied.</returns>
+        private static IQueryable<Reservation> FilterRemoveExpiredReservations(IQueryable<Reservation> query)
         {
-            return includeExpired ? true : reservation.EndTime < DateTimeOffset.Now;
+            return query.Where(reservation => DateTimeOffset.Now < reservation.EndTime);
         }
     }
 }

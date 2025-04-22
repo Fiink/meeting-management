@@ -1,6 +1,5 @@
 ﻿using MeetingManagementSystem.Contracts;
 using MeetingManagementSystem.Data.Models;
-using MeetingManagementSystem.Exceptions;
 using MeetingManagementSystem.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -44,7 +43,7 @@ namespace MeetingManagementSystem.Controllers
             _log.LogTrace("Received request for all reservations for participant, id={}, includeExpired={}", id, includeExpired);
             try
             {
-                var reservations = _meetingService.GetReservationsByOwner(id, includeExpired);
+                var reservations = _meetingService.GetReservationsForParticipant(id, includeExpired);
                 var dtos = MapToDTO(reservations);
                 return Ok(dtos);
             }
