@@ -1,5 +1,6 @@
 ﻿using MeetingManagementSystem.Contracts;
 using MeetingManagementSystem.Data.Models;
+using MeetingManagementSystem.Models;
 using MeetingManagementSystem.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -30,7 +31,8 @@ namespace MeetingManagementSystem.Controllers
                 var reservations = await _meetingService.GetReservationsByOwnerAsync(id, includeExpired);
                 var dtos = MapToDTO(reservations);
                 return Ok(dtos);
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 _log.LogError("Exception occurred while getting all reservations for owner, id={}, includeExpired={}, e={}", id, includeExpired, e);
                 return MapError(e);
@@ -58,18 +60,30 @@ namespace MeetingManagementSystem.Controllers
         public async Task<ActionResult<ReservationDTO>> AddReservation([FromBody] AddReservationDTO addReservationDTO)
         {
             _log.LogTrace("Received request to add reservation, addReservationDTO={}", addReservationDTO);
+
+            TimeRange time;
+            try
+            {
+                time = new TimeRange(addReservationDTO.StartTime, addReservationDTO.EndTime);
+            }
+            catch (ArgumentException)
+            {
+                _log.LogError("Invalid time provided in request, addReservationDTO={}", addReservationDTO);
+                return UnprocessableEntity();
+            }
+
             try
             {
                 Reservation reservation = await _meetingService.AddReservationAsync(
                     addReservationDTO.OwnerId,
                     addReservationDTO.MeetingRoomId,
                     addReservationDTO.MeetingName,
-                    addReservationDTO.StartTime,
-                    addReservationDTO.EndTime,
+                    time,
                     addReservationDTO.ParticipantIds
                 );
                 return new ReservationDTO(reservation);
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 _log.LogError("Exception occurred while adding new reservation, addReservationDTO={}, e={}", addReservationDTO, e);
                 return MapError(e);

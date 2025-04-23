@@ -18,15 +18,15 @@ namespace MeetingManagementSystem.Services
         public async Task<List<User>> GetUsersByIdsAsync(ICollection<int> participantIds)
         {
             return await (from user in _dbContext.Users
-                   where participantIds.Contains(user.Id)
-                   select user).ToListAsync();
+                          where participantIds.Contains(user.Id)
+                          select user).ToListAsync();
         }
 
         public async Task<User?> GetUserByIdAsync(int id)
         {
             return await (from user in _dbContext.Users
-                    where id == user.Id
-                    select user).SingleOrDefaultAsync();
+                          where id == user.Id
+                          select user).SingleOrDefaultAsync();
         }
 
         public async Task<User> AddUserAsync(string name)
@@ -42,11 +42,12 @@ namespace MeetingManagementSystem.Services
                 Name = name
             };
             var userEntity = await _dbContext.Users.AddAsync(user);
-            
+
             try
             {
                 await _dbContext.SaveChangesAsync();
-            } catch (DbUpdateException e)
+            }
+            catch (DbUpdateException e)
             {
                 _log.LogError("Error occurred while saving new user, user={}, e={}", userEntity, e);
                 throw new ResultException(ResultException.ExceptionType.PERSISTENCE_ERROR, "Error persisting new user");

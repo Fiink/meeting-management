@@ -30,7 +30,8 @@ namespace MeetingManagementSystem.Controllers
                 var room = await _meetingService.AddMeetingRoomAsync(roomName);
                 var dto = new MeetingRoomDTO(room);
                 return Ok(dto);
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 _log.LogError("Exception occurred while adding meeting room, roomName={}, e={}", roomName, e);
                 return MapError(e);

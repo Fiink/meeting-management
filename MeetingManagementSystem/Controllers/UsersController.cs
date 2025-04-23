@@ -25,12 +25,13 @@ namespace MeetingManagementSystem.Controllers
         public async Task<ActionResult<UserDTO>> GetById([FromRoute] int id)
         {
             _log.LogTrace("Received request for user by id, id={}", id);
-            
+
             var user = await _userService.GetUserByIdAsync(id);
             if (user == null)
             {
                 return NotFound();
-            } else
+            }
+            else
             {
                 return Ok(new UserDTO(user));
             }
@@ -40,12 +41,13 @@ namespace MeetingManagementSystem.Controllers
         public async Task<ActionResult<UserDTO>> AddUser([FromBody] string userName)
         {
             _log.LogTrace("Received request to add user, userName={}", userName);
-            
+
             try
             {
                 var user = await _userService.AddUserAsync(userName);
                 return Ok(new UserDTO(user));
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 _log.LogError("Exception occurred while adding user, userName={}, e={}", userName, e);
                 return MapError(e);

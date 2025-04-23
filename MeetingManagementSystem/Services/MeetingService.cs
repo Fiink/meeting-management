@@ -45,7 +45,8 @@ namespace MeetingManagementSystem.Services
                 .ToListAsync();
         }
 
-        public async Task<List<Reservation>> GetReservationsForParticipantAsync(int participantId, bool includeExpired = false) {
+        public async Task<List<Reservation>> GetReservationsForParticipantAsync(int participantId, bool includeExpired = false)
+        {
             var query = _dbContext.Users
                 .Where(user => user.Id == participantId)
                 .Join(
@@ -112,7 +113,7 @@ namespace MeetingManagementSystem.Services
                 var participants = await _userService.GetUsersByIdsAsync(participantIds);
                 if (participants.Count != participantIds.Count)
                 {
-                    _log.LogError("Could not find one more participants, expected {}, found {}, found users={}", 
+                    _log.LogError("Could not find one more participants, expected {}, found {}, found users={}",
                         participantIds.Count, participants.Count, participants);
                     throw new ResultException(ResultException.ExceptionType.NOT_FOUND, "Could not find one more provided participants");
                 }
@@ -141,6 +142,7 @@ namespace MeetingManagementSystem.Services
         {
             return _dbContext.MeetingRooms.ToListAsync();
         }
+
         public async Task<MeetingRoom> AddMeetingRoomAsync(string name)
         {
             if (await IsRoomNameInUseAsync(name.ToLower()))
@@ -173,17 +175,18 @@ namespace MeetingManagementSystem.Services
 
         private Task<bool> IsRoomOccupiedInTimeslotAsync(MeetingRoom room, TimeRange time)
         {
-            return (from reservations in _dbContext.Reservations
-                    where reservations.StartTime < time.EndTime && time.StartTime < reservations.EndTime && reservations.MeetingRoomId == room.Id
-                    select reservations).AnyAsync();
+            return _dbContext.Reservations
+                .Where(r => r.MeetingRoomId == room.Id)
+                .Where(r => !time.DoesOverlapWith(r.StartTime, r.EndTime))
+                .AnyAsync();
         }
 
         private Task<bool> IsRoomNameInUseAsync(string name)
         {
             var nameLowercase = name.ToLower();
             return (from room in _dbContext.MeetingRooms
-             where !String.IsNullOrEmpty(room.RoomName) && room.RoomName.Equals(nameLowercase)
-             select room).AnyAsync();
+                    where !String.IsNullOrEmpty(room.RoomName) && room.RoomName.Equals(nameLowercase)
+                    select room).AnyAsync();
         }
 
         /// <summary>
