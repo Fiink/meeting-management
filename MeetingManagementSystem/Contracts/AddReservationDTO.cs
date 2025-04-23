@@ -15,8 +15,8 @@
                    $"OwnerId = {OwnerId}, " +
                    $"MeetingRoomId = {MeetingRoomId}, " +
                    $"MeetingName = {MeetingName ?? "null"}, " +
-                   $"StartTime = {StartTime.ToString()}, " +
-                   $"EndTime = {EndTime.ToString()}, " +
+                   $"StartTime = {StartTime}, " +
+                   $"EndTime = {EndTime}, " +
                    $"ParticipantIds = {(ParticipantIds != null ? "[" + string.Join(", ", ParticipantIds) + "]" : "null")} " +
                    $"}}";
         }

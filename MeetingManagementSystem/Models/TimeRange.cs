@@ -30,10 +30,7 @@ namespace MeetingManagementSystem.Models
             return dateTime >= StartTime && dateTime <= EndTime;
         }
 
-        public bool DoesOverlapWith(DateTimeOffset startTime, DateTimeOffset endTime)
-        {
-            return startTime < EndTime && StartTime < endTime;
-        }
+        
 
         public override string ToString()
         {

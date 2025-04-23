@@ -1,5 +1,5 @@
 ﻿using MeetingManagementSystem.Contracts;
-using MeetingManagementSystem.Services;
+using MeetingManagementSystem.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MeetingManagementSystem.Controllers

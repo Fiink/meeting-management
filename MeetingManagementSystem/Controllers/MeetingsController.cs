@@ -1,7 +1,7 @@
 ﻿using MeetingManagementSystem.Contracts;
 using MeetingManagementSystem.Data.Models;
 using MeetingManagementSystem.Models;
-using MeetingManagementSystem.Services;
+using MeetingManagementSystem.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MeetingManagementSystem.Controllers

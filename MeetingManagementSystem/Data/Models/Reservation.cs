@@ -16,7 +16,7 @@ namespace MeetingManagementSystem.Data.Models
         public DateTimeOffset EndTime { get; set; }
 
         public int ReservationOwnerId { get; set; }
-    
+
         public User ReservationOwner { get; set; }
 
         public int MeetingRoomId { get; set; }

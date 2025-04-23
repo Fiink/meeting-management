@@ -17,5 +17,9 @@ namespace MeetingManagementSystem.Data.Models
             ParticipantId = participant.Id;
             Participant = participant;
         }
+
+        public MeetingParticipant()
+        {
+        }
     }
 }

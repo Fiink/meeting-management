@@ -1,6 +1,9 @@
 
 using MeetingManagementSystem.Data.Db;
-using MeetingManagementSystem.Services;
+using MeetingManagementSystem.Data.Interfaces;
+using MeetingManagementSystem.Data.Repositories;
+using MeetingManagementSystem.Services.Implementations;
+using MeetingManagementSystem.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
@@ -15,6 +18,11 @@ namespace MeetingManagementSystem
             // Configure ORM
             builder.Services.AddDbContext<MeetingDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            // Configure repositories 
+            builder.Services.AddScoped<IMeetingRoomRepository, MeetingRoomRepository>();
+            builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
 
             // Configure services
             builder.Services.AddScoped<IUserServiceAsync, UserService>();

@@ -1,7 +1,7 @@
 ﻿using MeetingManagementSystem.Data.Models;
 using MeetingManagementSystem.Models;
 
-namespace MeetingManagementSystem.Services
+namespace MeetingManagementSystem.Services.Interfaces
 {
     public interface IMeetingServiceAsync
     {

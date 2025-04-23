@@ -11,5 +11,7 @@ namespace MeetingManagementSystem.Data.Models
         public string RoomName { get; set; }
 
         public ICollection<Reservation> Reservations { get; set; }
+
+
     }
 }

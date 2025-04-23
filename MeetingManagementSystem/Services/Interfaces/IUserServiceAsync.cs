@@ -1,6 +1,6 @@
 ﻿using MeetingManagementSystem.Data.Models;
 
-namespace MeetingManagementSystem.Services
+namespace MeetingManagementSystem.Services.Interfaces
 {
     public interface IUserServiceAsync
     {

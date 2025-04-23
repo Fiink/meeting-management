@@ -13,7 +13,7 @@ namespace MeetingManagementSystem.Controllers
         /// <returns>A matching ActionResult</returns>
         protected ActionResult MapError(Exception e)
         {
-            if (!(e is ResultException resultException))
+            if (e is not ResultException resultException)
             {
                 // Rethrow exception to cause an internal server error
                 throw e;
