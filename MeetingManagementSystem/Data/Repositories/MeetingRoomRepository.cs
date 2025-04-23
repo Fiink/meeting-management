@@ -25,7 +25,7 @@ namespace MeetingManagementSystem.Data.Repositories
         {
             var nameLowercase = name.ToLower();
             return await (from room in _dbContext.MeetingRooms
-                    where !String.IsNullOrEmpty(room.RoomName) && room.RoomName.Equals(nameLowercase)
+                    where !String.IsNullOrEmpty(room.RoomName) && room.RoomName.ToLower().Equals(nameLowercase)
                     select room).AnyAsync();
         }
 

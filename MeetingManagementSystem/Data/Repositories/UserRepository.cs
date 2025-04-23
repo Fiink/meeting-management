@@ -38,7 +38,7 @@ namespace MeetingManagementSystem.Data.Repositories
 
         public async Task UpdateUserAsync()
         {
-            // This might not be the correct way to update users, this will likely update everything in the current context...
+            // This might not be the correct way to update users, this will likely update everything (e.g. rooms if we tracked those using this _dbContext)
             await _dbContext.SaveChangesAsync();
         }
 
@@ -50,7 +50,8 @@ namespace MeetingManagementSystem.Data.Repositories
 
         public async Task<bool> IsNameInUseAsync(string name)
         {
-            return await _dbContext.Users.AnyAsync(user => user.Name.Contains(name));
+            var lowercaseName = name.ToLower();
+            return await _dbContext.Users.AnyAsync(user => user.Name.ToLower().Equals(name));
         }
     }
 }
