@@ -1,8 +1,8 @@
 ﻿using MeetingManagementSystem.Data.Db;
 using MeetingManagementSystem.Data.Models;
 using MeetingManagementSystem.Exceptions;
+using MeetingManagementSystem.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 
 namespace MeetingManagementSystem.Services
 {
@@ -72,15 +72,8 @@ namespace MeetingManagementSystem.Services
                 .ToListAsync();
         }
 
-        public async Task<Reservation> AddReservationAsync(int ownerId, int meetingRoomId, string? meetingName, DateTimeOffset startTime,
-            DateTimeOffset endTime, ICollection<int>? participantIds)
+        public async Task<Reservation> AddReservationAsync(int ownerId, int meetingRoomId, string? meetingName, TimeRange time, ICollection<int>? participantIds)
         {
-            if (startTime > endTime)
-            {
-                _log.LogError("Invalid timeslots, reservation start time is after end time, start={}, end={}", startTime, endTime);
-                throw new ResultException(ResultException.ExceptionType.UNPROCESSABLE_ENTITY, "Invalid start- and end-time");
-            }
-
             var room = await GetMeetingRoomByIdAsync(meetingRoomId);
             if (room == null)
             {
@@ -95,7 +88,7 @@ namespace MeetingManagementSystem.Services
                 throw new ResultException(ResultException.ExceptionType.NOT_FOUND, "Owner not found");
             }
 
-            if (await IsRoomOccupiedInTimeslotAsync(room, startTime, endTime))
+            if (await IsRoomOccupiedInTimeslotAsync(room, time))
             {
                 _log.LogError("Failed to add reservation: Room is already occupied");
                 throw new ResultException(ResultException.ExceptionType.CONFLICT, "Meeting room is occupied in provided timeslot");
@@ -108,8 +101,8 @@ namespace MeetingManagementSystem.Services
                 MeetingRoomId = room.Id,
                 ReservationOwner = owner,
                 ReservationOwnerId = owner.Id,
-                StartTime = startTime,
-                EndTime = endTime,
+                StartTime = time.StartTime,
+                EndTime = time.EndTime,
                 Participants = []
             };
             var reservationEntity = await _dbContext.AddAsync(reservation);
@@ -178,10 +171,10 @@ namespace MeetingManagementSystem.Services
                     select meetingRooms).SingleOrDefaultAsync();
         }
 
-        private Task<bool> IsRoomOccupiedInTimeslotAsync(MeetingRoom room, DateTimeOffset startTime, DateTimeOffset endTime)
+        private Task<bool> IsRoomOccupiedInTimeslotAsync(MeetingRoom room, TimeRange time)
         {
             return (from reservations in _dbContext.Reservations
-                    where reservations.StartTime < endTime && startTime < reservations.EndTime && reservations.MeetingRoomId == room.Id
+                    where reservations.StartTime < time.EndTime && time.StartTime < reservations.EndTime && reservations.MeetingRoomId == room.Id
                     select reservations).AnyAsync();
         }
 

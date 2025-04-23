@@ -2,36 +2,24 @@
 
 namespace MeetingManagementSystem.Contracts
 {
-    public class ReservationDTO
+    public class ReservationDTO(Reservation reservation)
     {
-        public int Id { get; set; }
-        public string? Name { get; set; }
-        public DateTimeOffset StartTime { get; set; }
-        public DateTimeOffset EndTime { get; set; }
-        public UserDTO Owner { get; set; }
-        public int MeetingRoomId { get; set; }
-        public string MeetingRoomName { get; set; }
-        public IEnumerable<ParticipantDTO> Participants { get; set; }
-
-        public ReservationDTO(Reservation reservation)
-        {
-            Id = reservation.Id;
-            Name = reservation.MeetingName;
-            StartTime = reservation.StartTime;
-            EndTime = reservation.EndTime;
-            Owner = new UserDTO(reservation.ReservationOwner);
-            MeetingRoomId = reservation.MeetingRoomId;
-            MeetingRoomName = reservation.MeetingRoom.RoomName;
-            Participants = reservation.Participants.Select(p => new ParticipantDTO(p));
-        }
+        public int Id { get; set; } = reservation.Id;
+        public string? Name { get; set; } = reservation.MeetingName;
+        public DateTimeOffset StartTime { get; set; } = reservation.StartTime;
+        public DateTimeOffset EndTime { get; set; } = reservation.EndTime;
+        public UserDTO Owner { get; set; } = new UserDTO(reservation.ReservationOwner);
+        public int MeetingRoomId { get; set; } = reservation.MeetingRoomId;
+        public string MeetingRoomName { get; set; } = reservation.MeetingRoom.RoomName;
+        public IEnumerable<ParticipantDTO> Participants { get; set; } = reservation.Participants.Select(p => new ParticipantDTO(p));
 
         public override string ToString()
         {
             return $"ReservationDTO {{ " +
                    $"Id = {Id}, " +
                    $"Name = {Name ?? "null"}, " +
-                   $"StartTime = {StartTime.ToString()}, " +
-                   $"EndTime = {EndTime.ToString()}, " +
+                   $"StartTime = {StartTime}, " +
+                   $"EndTime = {EndTime}, " +
                    $"Owner = {Owner?.ToString() ?? "null"}, " +
                    $"MeetingRoomId = {MeetingRoomId}, " +
                    $"MeetingRoomName = {MeetingRoomName ?? "null"}, " +
