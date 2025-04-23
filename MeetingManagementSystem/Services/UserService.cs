@@ -5,33 +5,33 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MeetingManagementSystem.Services
 {
-    public class UserService(ILogger<UserService> logger, MeetingDbContext dbContext) : IUserService
+    public class UserService(ILogger<UserService> logger, MeetingDbContext dbContext) : IUserServiceAsync
     {
         private readonly ILogger<UserService> _log = logger;
         private readonly MeetingDbContext _dbContext = dbContext;
 
-        public List<User> GetAllUsers()
+        public async Task<List<User>> GetAllUsersAsync()
         {
-            return [.. _dbContext.Users];
+            return await _dbContext.Users.ToListAsync();
         }
 
-        public List<User> GetUsersByIds(ICollection<int> participantIds)
+        public async Task<List<User>> GetUsersByIdsAsync(ICollection<int> participantIds)
         {
-            return [.. (from user in _dbContext.Users
+            return await (from user in _dbContext.Users
                    where participantIds.Contains(user.Id)
-                   select user)];
+                   select user).ToListAsync();
         }
 
-        public User? GetUserById(int id)
+        public async Task<User?> GetUserByIdAsync(int id)
         {
-            return (from user in _dbContext.Users
+            return await (from user in _dbContext.Users
                     where id == user.Id
-                    select user).SingleOrDefault();
+                    select user).SingleOrDefaultAsync();
         }
 
-        public User AddUser(string name)
+        public async Task<User> AddUserAsync(string name)
         {
-            if (IsNameInUse(name))
+            if (await IsNameInUseAsync(name))
             {
                 _log.LogError("User with name already exists, name={}", name);
                 throw new ResultException(ResultException.ExceptionType.CONFLICT, "User with provided name already exists");
@@ -41,11 +41,11 @@ namespace MeetingManagementSystem.Services
             {
                 Name = name
             };
-            var userEntity = _dbContext.Users.Add(user);
+            var userEntity = await _dbContext.Users.AddAsync(user);
             
             try
             {
-                _dbContext.SaveChanges();
+                await _dbContext.SaveChangesAsync();
             } catch (DbUpdateException e)
             {
                 _log.LogError("Error occurred while saving new user, user={}, e={}", userEntity, e);
@@ -54,15 +54,15 @@ namespace MeetingManagementSystem.Services
             return userEntity.Entity;
         }
 
-        public User UpdateUserName(int id, string newName)
+        public async Task<User> UpdateUserNameAsync(int id, string newName)
         {
-            if (IsNameInUse(newName))
+            if (await IsNameInUseAsync(newName))
             {
                 _log.LogError("User with name already exists, newName={}", newName);
                 throw new ResultException(ResultException.ExceptionType.CONFLICT, "User with provided name already exists");
             }
 
-            var user = GetUserById(id);
+            var user = await GetUserByIdAsync(id);
             if (user == null)
             {
                 _log.LogError("User with id {} not found", id);
@@ -72,7 +72,7 @@ namespace MeetingManagementSystem.Services
             user.Name = newName;
             try
             {
-                _dbContext.SaveChanges();
+                await _dbContext.SaveChangesAsync();
             }
             catch (DbUpdateException e)
             {
@@ -82,9 +82,9 @@ namespace MeetingManagementSystem.Services
             return user;
         }
 
-        public void RemoveUser(int id)
+        public async Task RemoveUserAsync(int id)
         {
-            var user = GetUserById(id);
+            var user = await GetUserByIdAsync(id);
             if (user == null)
             {
                 _log.LogError("User with id {} not found", id);
@@ -94,7 +94,7 @@ namespace MeetingManagementSystem.Services
             _dbContext.Remove(user);
             try
             {
-                _dbContext.SaveChanges();
+                await _dbContext.SaveChangesAsync();
             }
             catch (DbUpdateException e)
             {
@@ -103,9 +103,9 @@ namespace MeetingManagementSystem.Services
             }
         }
 
-        private bool IsNameInUse(string name)
+        private Task<bool> IsNameInUseAsync(string name)
         {
-            return _dbContext.Users.Any(user => user.Name.Contains(name));
+            return _dbContext.Users.AnyAsync(user => user.Name.Contains(name));
         }
     }
 }

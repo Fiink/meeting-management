@@ -7,27 +7,27 @@ namespace MeetingManagementSystem.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class MeetingsController(ILogger<MeetingsController> log, IMeetingService meetingService) : AbstractController
+    public class MeetingsController(ILogger<MeetingsController> log, IMeetingServiceAsync meetingService) : AbstractController
     {
         private readonly ILogger<MeetingsController> _log = log;
-        private readonly IMeetingService _meetingService = meetingService;
+        private readonly IMeetingServiceAsync _meetingService = meetingService;
 
         [HttpGet]
-        public ActionResult<IEnumerable<ReservationDTO>> GetAllReservations([FromQuery] bool includeExpired = false)
+        public async Task<ActionResult<IEnumerable<ReservationDTO>>> GetAllReservations([FromQuery] bool includeExpired = false)
         {
             _log.LogTrace("Received request for all reservations, includeExpired={}", includeExpired);
-            var reservations = _meetingService.GetAllReservations(includeExpired);
+            var reservations = await _meetingService.GetAllReservationsAsync(includeExpired);
             var dtos = MapToDTO(reservations);
             return Ok(dtos);
         }
 
         [HttpGet("owner/{id}")]
-        public ActionResult<IEnumerable<ReservationDTO>> GetAllReservationsForOwner([FromRoute] int id, [FromQuery] bool includeExpired = false)
+        public async Task<ActionResult<IEnumerable<ReservationDTO>>> GetAllReservationsForOwner([FromRoute] int id, [FromQuery] bool includeExpired = false)
         {
             _log.LogTrace("Received request for all reservations for owner, id={}, includeExpired={}", id, includeExpired);
             try
             {
-                var reservations = _meetingService.GetReservationsByOwner(id, includeExpired);
+                var reservations = await _meetingService.GetReservationsByOwnerAsync(id, includeExpired);
                 var dtos = MapToDTO(reservations);
                 return Ok(dtos);
             } catch (Exception e)
@@ -38,12 +38,12 @@ namespace MeetingManagementSystem.Controllers
         }
 
         [HttpGet("participant/{id}")]
-        public ActionResult<IEnumerable<ReservationDTO>> GetAllReservationsForParticipant([FromRoute] int id, [FromQuery] bool includeExpired = false)
+        public async Task<ActionResult<IEnumerable<ReservationDTO>>> GetAllReservationsForParticipant([FromRoute] int id, [FromQuery] bool includeExpired = false)
         {
             _log.LogTrace("Received request for all reservations for participant, id={}, includeExpired={}", id, includeExpired);
             try
             {
-                var reservations = _meetingService.GetReservationsForParticipant(id, includeExpired);
+                var reservations = await _meetingService.GetReservationsForParticipantAsync(id, includeExpired);
                 var dtos = MapToDTO(reservations);
                 return Ok(dtos);
             }
@@ -55,12 +55,12 @@ namespace MeetingManagementSystem.Controllers
         }
 
         [HttpPost]
-        public ActionResult<ReservationDTO> AddReservation([FromBody] AddReservationDTO addReservationDTO)
+        public async Task<ActionResult<ReservationDTO>> AddReservation([FromBody] AddReservationDTO addReservationDTO)
         {
             _log.LogTrace("Received request to add reservation, addReservationDTO={}", addReservationDTO);
             try
             {
-                Reservation reservation = _meetingService.AddReservation(
+                Reservation reservation = await _meetingService.AddReservationAsync(
                     addReservationDTO.OwnerId,
                     addReservationDTO.MeetingRoomId,
                     addReservationDTO.MeetingName,
@@ -75,7 +75,6 @@ namespace MeetingManagementSystem.Controllers
                 return MapError(e);
             }
         }
-
 
         private static IEnumerable<ReservationDTO> MapToDTO(IEnumerable<Reservation> reservations)
         {

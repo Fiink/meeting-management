@@ -17,8 +17,8 @@ namespace MeetingManagementSystem
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             // Configure services
-            builder.Services.AddScoped<IUserService, UserService>();
-            builder.Services.AddScoped<IMeetingService, MeetingService>();
+            builder.Services.AddScoped<IUserServiceAsync, UserService>();
+            builder.Services.AddScoped<IMeetingServiceAsync, MeetingService>();
 
             // Configure REST controllers
             builder.Services.AddControllers();
